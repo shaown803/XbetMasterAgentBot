@@ -1,0 +1,6 @@
+services:
+  - type: worker
+    name: 1xBet-Mobcash-Bot
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python bot.py"
