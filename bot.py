@@ -50,5 +50,5 @@ def main():
     application.run_polling()
 
 # Run the bot
-if name == "main":
+if __name__ == "__main__":
     main()
