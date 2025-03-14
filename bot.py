@@ -1,6 +1,6 @@
 import os
 from telegram import Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
 
 # Load the bot token from environment variables
 TOKEN = os.getenv("BOT_TOKEN")
