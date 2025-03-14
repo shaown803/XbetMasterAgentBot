@@ -4,7 +4,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Call
 
 # Load the bot token from GitHub Secrets
 TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_GROUP_ID = -1001234567890  # Replace with your private admin group ID
+ADMIN_GROUP_ID = -4618214079  # Replace with your private admin group ID
 
 # Initialize bot application
 app = Application.builder().token(TOKEN).build()
