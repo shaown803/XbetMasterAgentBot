@@ -1,57 +1,52 @@
 import os
 import logging
-import threading
 import psycopg2
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import (
-    API_ID, API_HASH, BOT_TOKEN, ADMIN_GROUP_ID, DATABASE_URL,
-    PAYMENT_METHODS, LANGUAGES, WITHDRAWAL_ADDRESS,
-    MOBCASH_LIMIT, DEPOSIT_COMMISSION, WITHDRAWAL_COMMISSION, ADMIN_ROLES
+    API_ID, API_HASH, BOT_TOKEN, ADMIN_GROUP_ID, DATABASE_URL
 )
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# Database Connection (with error handling)
+# ✅ Database Connection (with error handling)
 try:
     conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
     logger.info("✅ Database connection established successfully.")
+
+    # ✅ Create transactions table if it doesn't exist
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id SERIAL PRIMARY KEY,
+            player_id VARCHAR(50) NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            amount NUMERIC(10, 2) NOT NULL,
+            wallet_number VARCHAR(50) NOT NULL,
+            payment_method VARCHAR(50) NOT NULL,
+            transaction_id VARCHAR(100) UNIQUE NOT NULL,
+            type VARCHAR(10) CHECK (type IN ('deposit', 'withdraw')) NOT NULL,
+            status VARCHAR(20) CHECK (status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending'
+        );
+    """)
+    conn.commit()
+    logger.info("✅ Database table 'transactions' checked/created.")
+
 except Exception as e:
     logger.error(f"❌ Database connection failed: {e}")
-    conn = None  # Prevent further crashes if the DB is unavailable
+    conn = None  # Prevent crashes if the DB is unavailable
 
-# PostgreSQL Connection using SQLAlchemy
-engine = create_engine(DATABASE_URL, echo=True)  # Use PostgreSQL URL from config.py
-Base = declarative_base()
-
-# Define the Transactions Table
-class Transaction(Base):
-    __tablename__ = 'transactions'
-    id = Column(Integer, primary_key=True)
-    player_id = Column(String, nullable=False)
-    amount = Column(Integer, nullable=False)
-    payment_method = Column(String, nullable=False)
-    status = Column(String, default="Pending")
-
-# Automatically create tables if they don’t exist
-Base.metadata.create_all(engine)
-
-# Create a session
-SessionLocal = sessionmaker(bind=engine)
-session = SessionLocal()
-
-logger.info("✅ Database tables checked and created if necessary.")
-
-# Initialize bot
+# ✅ Initialize Telegram Bot
 bot = Client(
     "mobcash_bot",
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN
 )
+
+logger.info("✅ Bot initialized successfully.")
 
 # Store user selections
 user_payment_method = {}
