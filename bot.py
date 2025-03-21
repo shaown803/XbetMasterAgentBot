@@ -23,6 +23,28 @@ except Exception as e:
     logger.error(f"❌ Database connection failed: {e}")
     conn = None  # Prevent further crashes if the DB is unavailable
 
+# PostgreSQL Connection using SQLAlchemy
+engine = create_engine(DATABASE_URL, echo=True)  # Use PostgreSQL URL from config.py
+Base = declarative_base()
+
+# Define the Transactions Table
+class Transaction(Base):
+    __tablename__ = 'transactions'
+    id = Column(Integer, primary_key=True)
+    player_id = Column(String, nullable=False)
+    amount = Column(Integer, nullable=False)
+    payment_method = Column(String, nullable=False)
+    status = Column(String, default="Pending")
+
+# Automatically create tables if they don’t exist
+Base.metadata.create_all(engine)
+
+# Create a session
+SessionLocal = sessionmaker(bind=engine)
+session = SessionLocal()
+
+logger.info("✅ Database tables checked and created if necessary.")
+
 # Initialize bot
 bot = Client(
     "mobcash_bot",
